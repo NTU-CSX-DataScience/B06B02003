@@ -1,7 +1,7 @@
 ---
 title: "HW1"
 author: "b06b02003"
-date: "2017¦~9¤ë16¤é"
+date: "2017å¹´9æœˆ16æ—¥"
 output: html_document
 ---
 
@@ -9,21 +9,21 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-#ÃD¥Ø:¥x¤j©Ê§O¨èªOÄ³ÃD
+é¡Œç›®:å°å¤§æ€§åˆ¥åˆ»æ¿è­°é¡Œ
 
-¸ê®Æ·½:
+è³‡æ–™æº:
  
- 1.¥x¤j¦U°|¨t¨k¤k¦b¾Ç¤H¼Æ1998-2016 https://www.ntu.edu.tw/about/statistics.html
+ 1.å°å¤§å„é™¢ç³»ç”·å¥³åœ¨å­¸äººæ•¸1998-2016 https://www.ntu.edu.tw/about/statistics.html
  
- 2.¨k¤kÁ~¸ê¤Î¥Í²£¤O²Î­p¸ê®Æ http://win.dgbas.gov.tw/dgbas04/bc5/EarningAndProductivity/Default.aspx
+ 2.ç”·å¥³è–ªè³‡åŠç”Ÿç”¢åŠ›çµ±è¨ˆè³‡æ–™ http://win.dgbas.gov.tw/dgbas04/bc5/EarningAndProductivity/Default.aspx
 
-¹Ïªí§e²{¤è¦¡
+åœ–è¡¨å‘ˆç¾æ–¹å¼
  
- 1.¥x¤j¦U¾Ç°|¾ú¦~©Ê§O¤ñ(§é½u¹Ï)
+ 1.å°å¤§å„å­¸é™¢æ­·å¹´æ€§åˆ¥æ¯”(æŠ˜ç·šåœ–)
  
- 2.¦U²£·~¾ú¦~©Ê§O¤ñ(§é½u¹Ï)
+ 2.å„ç”¢æ¥­æ­·å¹´æ€§åˆ¥æ¯”(æŠ˜ç·šåœ–)
 
-²§½è¨Ó·½·sªí²£¥Í:»P¨ä¥L¤j¾Ç¦U¾Ç°|ªº©Ê§O¤ñ°µ¤ñ¸û
+ç•°è³ªä¾†æºæ–°è¡¨ç”¢ç”Ÿ:èˆ‡å…¶ä»–å¤§å­¸å„å­¸é™¢çš„æ€§åˆ¥æ¯”åšæ¯”è¼ƒ
 
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
