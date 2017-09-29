@@ -1,0 +1,58 @@
+---
+title: "HW2"
+author: "b06b02003"
+date: "2017年9月29日"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(dplyr)
+```
+#台灣死因分析
+
+##原始資料
+```{r}
+Death <- read.csv("C:/Users/angel/Downloads/Death.csv")
+```
+```{r echo=FALSE}
+Death
+```
+
+##Q1意外致死率最高的年份是?
+```{r}
+Q1 = Death %>%
+  mutate(`Accident Rate` = Accident/Death) %>% 
+  filter(`Accident Rate` == max(`Accident Rate`)) %>%
+  select(Year,Death,Accident,`Accident Rate`)
+```
+```{r echo=FALSE}
+Q1
+```
+
+##Q2在哪些年中癌症死亡率佔超過四大死亡疾病的一半?
+```{r}
+Q2 = Death %>%
+  mutate(`Cancer Rate` = Cancer/(Cancer + Cerebrovascular + HeartDisease + Diabetes)) %>%
+  filter(`Cancer Rate` > 0.5) %>%
+  select(Year,Cancer,Cerebrovascular,HeartDisease,Diabetes,`Cancer Rate`)
+```
+```{r echo=FALSE}
+Q2
+```
+
+##Q3哪一年因其他原因死亡的比例最高?
+```{r}
+Q3 = Death %>%
+  mutate(`Five Major Causes`= Cancer + Cerebrovascular + Accident + HeartDisease + Diabetes, 
+        `Others` = Death -`Five Major Causes`,
+       `Others Rate` = `Others`/Death) %>%
+  filter(`Others Rate` == max(`Others Rate`)) %>%
+  select(Year,Death,`Five Major Causes`,`Others`,`Others Rate`)
+```
+```{r echo=FALSE}
+Q3
+```
+
