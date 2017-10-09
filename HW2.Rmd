@@ -10,6 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 ```{r}
 library(dplyr)
+library(ggplot2)
+library(reshape2)
 ```
 #台灣死因分析
 
@@ -21,38 +23,58 @@ Death <- read.csv("C:/Users/angel/Downloads/Death.csv")
 Death
 ```
 
-##Q1意外致死率最高的年份是?
+##Q1.2010與1986年的死因比較
+###先增加一個除了五大死因以外的欄位
 ```{r}
-Q1 = Death %>%
-  mutate(`Accident Rate` = Accident/Death) %>% 
-  filter(`Accident Rate` == max(`Accident Rate`)) %>%
-  select(Year,Death,Accident,`Accident Rate`)
+d1 = Death %>% 
+  mutate(Others=Death-Cancer-Cerebrovascular-Accident-HeartDisease-Diabetes)
+```
+###再把2010和1986年的資料挑出來
+```{r}
+d2=melt(d1,id=c("Year","Death"))%>%filter(Year==2010|Year==1986)
+```
+###畫成圓餅圖
+```{r}
+d2$Year = factor(d2$Year)
+pie = ggplot(d2, aes(x="Death", y=value, fill=variable))+
+  geom_bar(stat="identity",position="fill",width=1)+
+  facet_wrap(~Year)+
+  coord_polar(theta = "y")+
+  labs(x="",y="",title="")+
+  theme(axis.ticks = element_blank())
 ```
 ```{r echo=FALSE}
-Q1
+pie
 ```
 
-##Q2在哪些年中癌症死亡率佔超過四大死亡疾病的一半?
+###由圖可知,經過24年後,癌症死亡的比例大幅上升,腦血管疾病和意外的死亡比例則相對減少
+
+##Q2歷年來的意外致死率趨勢
 ```{r}
 Q2 = Death %>%
-  mutate(`Cancer Rate` = Cancer/(Cancer + Cerebrovascular + HeartDisease + Diabetes)) %>%
-  filter(`Cancer Rate` > 0.5) %>%
-  select(Year,Cancer,Cerebrovascular,HeartDisease,Diabetes,`Cancer Rate`)
+  group_by(Year) %>%
+  summarise(AccidentRate=Accident/Death)
+Q2plot = ggplot(Q2, aes(x=Year,y=AccidentRate))+
+  geom_line()+
+  geom_point()
 ```
 ```{r echo=FALSE}
-Q2
+Q2plot
 ```
 
-##Q3哪一年因其他原因死亡的比例最高?
+###由折線圖可以看出,意外致死率大致呈現逐年下降的趨勢,惟1999年突然上升,可能是因九二一大地震的緣故
+
+##Q3歷年來的疾病致死率趨勢
 ```{r}
 Q3 = Death %>%
-  mutate(`Five Major Causes`= Cancer + Cerebrovascular + Accident + HeartDisease + Diabetes, 
-        `Others` = Death -`Five Major Causes`,
-       `Others Rate` = `Others`/Death) %>%
-  filter(`Others Rate` == max(`Others Rate`)) %>%
-  select(Year,Death,`Five Major Causes`,`Others`,`Others Rate`)
+  group_by(Year) %>%
+  summarise(DiseaseRate=Cancer+Cerebrovascular+HeartDisease+Diabetes/Death)
+Q3plot = ggplot(Q3, aes(x=Year,y=DiseaseRate))+
+  geom_line()+
+  geom_point()
 ```
 ```{r echo=FALSE}
-Q3
+Q3plot
 ```
 
+###相較於意外致死率逐年下降,四大主要疾病的致死率則呈現逐年上升的趨勢
