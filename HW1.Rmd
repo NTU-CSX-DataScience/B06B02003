@@ -1,45 +1,28 @@
 ---
 title: "HW1"
-author: "b06b02003生技一何佳儀"
-date: "2017?~9??16??"
+author: "b06b02003生技一何佳儀" 
+date: "2017年9月16日"	
 output: html_document
 ---
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+  		  
+#題目:台大性別刻板議題
 
-#?D??:?x?j?ʧO???Oĳ?D
+##資料源:
+   		   
+###1.台大各院系男女在學人數1998-2016 
+###https://www.ntu.edu.tw/about/statistics.html
+   		   
+###2.男女薪資及生產力統計資料 
+###http://win.dgbas.gov.tw/dgbas04/bc5/EarningAndProductivity/Default.aspx	
 
-???Ʒ?:
- 
- 1.?x?j?U?|?t?k?k?b?ǤH??1998-2016 https://www.ntu.edu.tw/about/statistics.html
- 
- 2.?k?k?~???ΥͲ??O?έp???? http://win.dgbas.gov.tw/dgbas04/bc5/EarningAndProductivity/Default.aspx
+##圖表呈現方式
+   		   
+###1.台大各學院歷年性別比(折線圖)	
 
-?Ϫ??e?{?覡
- 
- 1.?x?j?U?ǰ|???~?ʧO??(???u??)
- 
- 2.?U???~???~?ʧO??(???u??)
-
-?????ӷ??s?���??:?P???L?j?ǦU?ǰ|???ʧO?񰵤???
-
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+###2.各產業歷年性別比(折線圖)
+  		  
+##異質來源新表產生:
+###與其他大學各學院的性別比做比較		 
