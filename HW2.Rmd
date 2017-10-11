@@ -1,6 +1,6 @@
 ---
 title: "HW2"
-author: "b06b02003"
+author: "b06b02003生技一何佳儀"
 date: "2017年9月29日"
 output: html_document
 ---
