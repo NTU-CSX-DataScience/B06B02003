@@ -1,0 +1,71 @@
+---
+title: "HW3"
+author: "b06b02003生技一何佳儀"
+date: "2017年10月29日"
+output: html_document
+---
+#台北捷運美食通文字雲
+##使用套件
+```{r}
+library(Rfacebook)
+library(NLP)
+library(tm)
+library(jiebaRD)
+library(jiebaR)
+library(RColorBrewer)
+library(wordcloud)
+
+```
+##抓取臉書資料
+```{r}
+page.id <- "890212461087699" 
+token <- "123646328319174|BXykPz_PGpwMR7909eybOoJkktU" 
+page <- getPage(page.id, token, n = 300)
+```
+##文本清理
+```{r}
+docs <- Corpus(VectorSource(page$message))
+toSpace <- content_transformer(function(x, pattern) {
+  return (gsub(pattern, " ", x))}
+)
+docs <- tm_map(docs, toSpace, "的")
+docs <- tm_map(docs, toSpace, "啊")
+docs <- tm_map(docs, toSpace, "站")
+docs <- tm_map(docs, toSpace, "有")
+docs <- tm_map(docs, toSpace, "了")
+docs <- tm_map(docs, toSpace, "是")
+docs <- tm_map(docs, toSpace, "很")
+docs <- tm_map(docs, toSpace, "都")
+docs <- tm_map(docs, toSpace, "在")
+docs <- tm_map(docs, toSpace, "和")
+docs <- tm_map(docs, toSpace, "這")
+docs <- tm_map(docs, toSpace, "讓")
+docs <- tm_map(docs, toSpace, "跟")
+docs <- tm_map(docs, toSpace, "就")
+docs <- tm_map(docs, toSpace, "真")
+docs <- tm_map(docs, toSpace, "上")
+docs <- tm_map(docs, toSpace, "但")
+docs <- tm_map(docs, toSpace, "又")
+docs <- tm_map(docs, removePunctuation)
+docs <- tm_map(docs, removeNumbers)
+docs <- tm_map(docs, stripWhitespace)
+```
+##製作文字雲
+```{r}
+mixseg = worker()
+jieba_tokenizer=function(d){
+  unlist(segment(d[[1]],mixseg))
+}
+seg = lapply(docs, jieba_tokenizer)
+freqFrame = as.data.frame(table(unlist(seg)))
+freqFrame = freqFrame[-c(1:34),]
+wordcloud(freqFrame$Var1,freqFrame$Freq,
+          scale=c(5,0.5),min.freq=10,max.words=50,
+          random.order=FALSE, random.color=TRUE, 
+          rot.per=0, colors=brewer.pal(8, "Dark2"),
+          ordered.colors=FALSE,use.r.layout=FALSE,
+          fixed.asp=TRUE)
+```
+
+###文字雲中最常出現的字就是"吃美食"這三個字,這很合理,因為這是介紹美食的粉專。另外,由於這是是台北捷運美食通,所以"台北"這兩個字也蠻常出現。其他地名如"忠孝"、"板橋"、"新莊"、"中山"就是比較熱門的美食景點。"起司"、"吐司"、"甜點"、"咖啡"則是比較熱門的美食。
+
