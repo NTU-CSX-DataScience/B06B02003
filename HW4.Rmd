@@ -1,0 +1,208 @@
+---
+title: "HW4"
+author: "b06b02003生技一何佳儀"
+date: "2017年11月19日"
+output: html_document
+---
+#台灣旅遊分析
+##套件安裝
+```{r results='hide'}
+library(NLP)
+library(tm)
+library(tmcn)
+Sys.setenv(JAVA_HOME="C:/Program Files/Java/jdk-9.0.1/")
+library(rJava)
+library(SnowballC)
+library(slam)
+library(Matrix)
+library(jiebaRD)
+library(jiebaR)
+library(plotly)
+library(stats)
+library(scales)
+library(grid)
+library(ggplot2)
+library(ggbiplot)
+library(dplyr)
+```
+##讀取文本
+```{r}
+setwd("C:/Users/angel/Desktop/github/HW4")
+filenames <- list.files(getwd(), pattern="*a.txt")
+files <- lapply(filenames, readLines)
+docs <- Corpus(VectorSource(files))
+```
+##文本清理與斷字
+```{r}
+toSpace <- content_transformer(function(x, pattern) {
+  return (gsub(pattern, " ", x))
+}
+)
+docs <- tm_map(docs, removePunctuation)
+docs <- tm_map(docs, removeNumbers)
+docs <- tm_map(docs, stripWhitespace)
+mixseg = worker()
+jieba_tokenizer=function(d){
+  unlist(segment(d[[1]],mixseg))
+}
+seg = lapply(docs, jieba_tokenizer)
+d.corpus <- Corpus(VectorSource(seg))
+```
+##計算tf-idf
+```{r}
+tdm <- TermDocumentMatrix(d.corpus, 
+                          control = list(wordLengths = c(2, Inf)))
+N = tdm$ncol
+tf <- apply(tdm, 2, sum)
+idfCal <- function(word_doc)
+{ 
+  log2( N / nnzero(word_doc) ) 
+}
+idf <- apply(tdm, 1, idfCal)
+
+
+doc.tfidf <- as.matrix(tdm)
+for(x in 1:nrow(tdm))
+{
+  for(y in 1:ncol(tdm))
+  {
+    doc.tfidf[x,y] <- (doc.tfidf[x,y] / tf[y]) * idf[x]
+  }
+}
+```
+##找出基隆的特色
+```{r}
+ass = findAssocs(tdm, "基隆", 0.93)
+ass
+```
+
+###相關係數最高的是九份和金瓜石,兩者皆是基隆附近熱門的旅遊景點
+##計算文章相似度
+```{r}
+nonzero = (doc.tfidf != rep(0,10))
+nonzeroid = which(row_sums(nonzero) != 0)
+q <- rownames(doc.tfidf[nonzeroid,])
+all.term <- rownames(doc.tfidf)
+loc <- which(all.term %in% q)
+s.tdm <- doc.tfidf[loc,]
+cos.sim <- function(x, y)
+{ 
+  (as.vector(x) %*% as.vector(y)) / (norm(as.matrix(x)) * norm(y)) 
+}
+doc.cos <- cos.sim(x=as.matrix(s.tdm[,1]), 
+                   y=as.matrix(s.tdm[,2]))
+doc.cos <- apply(s.tdm[,2:60], 2, cos.sim,
+                 y=as.matrix(s.tdm[,1]))
+orderDoc <- doc.cos[order(doc.cos, decreasing = TRUE)]
+plot_ly(data = as.data.frame(orderDoc),
+        x = rownames(as.data.frame(orderDoc)),
+        y = orderDoc, 
+        type = "bar")
+```
+
+###實際查閱與第一篇文章相似度較高的幾篇文章,發現皆為與鐵路旅遊相關的文章
+
+##將文章按月份分類
+```{r results='hide'}
+df = data.frame(text = content(docs),
+                filenames = filenames)
+df = df%>% mutate(month=substr(filenames,5,6))
+organize = function(x){
+  write.table(df%>%filter(month==x),paste0(x,"m.txt"))
+}
+lapply(paste0("0",1:9),organize)
+lapply(10:12,organize)
+filenames <- list.files(getwd(), pattern="*m.txt")
+files <- lapply(filenames, readLines)
+docs <- Corpus(VectorSource(files))
+toSpace <- content_transformer(function(x, pattern) {
+  return (gsub(pattern, " ", x))
+}
+)
+docs <- tm_map(docs, removePunctuation)
+docs <- tm_map(docs, removeNumbers)
+docs <- tm_map(docs, stripWhitespace)
+mixseg = worker()
+jieba_tokenizer=function(d){
+  unlist(segment(d[[1]],mixseg))
+}
+seg = lapply(docs, jieba_tokenizer)
+d.corpus <- Corpus(VectorSource(seg))
+tdm <- TermDocumentMatrix(d.corpus, 
+                          control = list(wordLengths = c(2, Inf)))
+N = tdm$ncol
+tf <- apply(tdm, 2, sum)
+idfCal <- function(word_doc)
+{ 
+  log2( N / nnzero(word_doc) ) 
+}
+idf <- apply(tdm, 1, idfCal)
+
+
+doc.tfidf2 <- as.matrix(tdm)
+for(x in 1:nrow(tdm))
+{
+  for(y in 1:ncol(tdm))
+  {
+    doc.tfidf2[x,y] <- (doc.tfidf2[x,y] / tf[y]) * idf[x]
+  }
+}
+```
+##找出出現頻率較高的詞
+```{r}
+result = findFreqTerms(tdm, 20)
+result
+```
+
+##分析基隆、台東、高雄在不同月份的旅遊情況
+```{r}
+topID = lapply(as.data.frame(result)$result, function(x) 
+  which(rownames(tdm) == x))
+topID = unlist(topID)
+plot_ly(data = as.data.frame(doc.tfidf2),
+        x = as.numeric(colnames(doc.tfidf2)),
+        y = doc.tfidf2[topID[75],], 
+        name = rownames(doc.tfidf2)[topID[75]],
+        type = "scatter", mode= "box") %>%
+  add_trace(y = doc.tfidf2[topID[404],],
+            name = rownames(doc.tfidf2)[topID[404]])%>%
+  add_trace(y = doc.tfidf2[topID[237],],
+            name = rownames(doc.tfidf2)[topID[237]])
+```
+
+###由圖可見,高雄在10月時出現高峰,基隆則是在3月出現高峰,台東的情況較平均
+
+##再加入離島金門與台灣本島比較
+```{r}
+plot_ly(data = as.data.frame(doc.tfidf2),
+        x = as.numeric(colnames(doc.tfidf2)),
+        y = doc.tfidf2[topID[75],], 
+        name = rownames(doc.tfidf2)[topID[75]],
+        type = "scatter", mode= "box") %>%
+  add_trace(y = doc.tfidf2[topID[404],],
+            name = rownames(doc.tfidf2)[topID[404]])%>%
+  add_trace(y = doc.tfidf2[topID[237],],
+            name = rownames(doc.tfidf2)[topID[237]])%>%
+  add_trace(y = doc.tfidf2[topID[430],],
+            name = rownames(doc.tfidf2)[topID[430]])
+```
+
+###金門的旅遊情況高度集中在7月暑假的時候
+
+##用kmeans分群,並利用pca作圖
+```{r}
+testTfidf = doc.tfidf
+kmeansOut <- kmeans(testTfidf, 5, nstart = 20)
+tfidf.pca <- prcomp(testTfidf)
+tfidf.kmeans <- as.factor(kmeansOut$cluster)
+
+g <- ggbiplot(tfidf.pca, obs.scale = 1, var.scale = 1, 
+              groups = tfidf.kmeans, ellipse = TRUE, 
+              circle = TRUE, labels = rownames(testTfidf))
+g <- g + scale_color_discrete(name = '')
+g <- g + theme(legend.direction = 'horizontal', 
+               legend.position = 'top')
+print(g)
+```
+
+###從圖中可明顯看出美景、照片、攝影等詞彙的平面,其他分群較不明顯
