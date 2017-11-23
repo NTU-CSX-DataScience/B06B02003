@@ -1,4 +1,4 @@
-# B06B02003
+# B06B02003 https://angel184.shinyapps.io/angel/
 
 作業一 RMarkdown 提案書: https://ntu-csx-datascience.github.io/B06B02003/HW1.html
 
