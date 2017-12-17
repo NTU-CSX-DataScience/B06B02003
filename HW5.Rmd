@@ -1,0 +1,131 @@
+---
+title: "HW5"
+author: "生技一何佳儀b06b02003"
+date: "2017年12月16日"
+output: html_document
+---
+#登革熱病例分析
+##套件安裝
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(Hmisc)
+library(e1071)
+```
+##讀入資料
+```{r}
+Dengue <- read_csv("C:/Users/angel/Desktop/github/Dengue.csv")
+Dengue = Dengue[,-1]
+attach(Dengue)
+Dengue$city = as.factor(city)
+Dengue$gender = as.factor(gender)
+Dengue$foreign = as.factor(foreign)
+Dengue$age = as.factor(age)
+head(Dengue)
+```
+##SVM分析
+###預測此病例是否為境外移入
+```{r}
+testID = sample(1:nrow(Dengue),100,replace=FALSE)
+x = subset(Dengue[testID,],select = -foreign)
+y = Dengue$foreign[testID]
+svm_model = svm(foreign ~., data = Dengue[-testID,])
+pred = predict(svm_model, x)
+t = table(pred,y)
+t
+```
+###計算此模型的正確率
+```{r}
+ac = (t[1,1]+t[2,2])/100
+ac
+```
+##相關係數與迴歸分析
+###計算年月與得登革熱人數的相關係數
+```{r}
+cy = Dengue %>% group_by(year) %>% summarise(count=sum(count))
+cor(cy$count,cy$year)
+cm = Dengue %>% group_by(month) %>% summarise(count=sum(count))
+cor(cm$count,cm$month)
+```
+###由結果可知兩者皆與得登革熱人數呈正相關,畫出迴歸圖形看看
+```{r}
+result1 = lm(cy$count ~ cy$year)
+plot(cy$year, cy$count, pch = 16, cex = 1.3, col = "blue",
+     xlab = "Year", ylab = "Number of Patient")
+abline(result1)
+result2 = lm(cm$count ~ cm$month)
+plot(cm$month, cm$count, pch = 16, cex = 1.3, col = "blue",
+     xlab = "Month", ylab = "Number of Patient")
+abline(result2)
+```
+
+###由圖形可看出,得登革熱人數在2014和2015年飆高,月份上則是從七八月開始增加,到十二月又開始減少
+
+
+##T檢定
+###我以性別對得登革熱人數的影響進行T檢定,首先先畫出盒型圖,由於人數分布較為分散,故我取了log
+```{r}
+cg = Dengue %>% group_by(year,month,gender) %>% summarise(count=sum(count))
+require(ggplot2)
+ggplot(data = cg, aes(x = gender, y = log10(count))) +
+  geom_boxplot() + coord_flip() +
+  labs( y = 'Log10 of Patient Number', x = 'gender')
+```
+
+###接著進行T檢定
+```{r}
+t.test(count ~ gender, data = cg)
+```
+###p-value為0.9818 > 0.05,故無法否認虛無假說,即男女得到登革熱的人數是一樣的
+
+
+##ANOVA檢定
+###分析年齡對得登革熱人數的影響,首先定出年齡層的順序
+```{r}
+ca = Dengue %>% group_by(year,month,age) %>% summarise(count=sum(count))
+ca$age <- factor(ca$age, levels = c('0','1','2','3','4',
+                                            '5-9','10-14','15-19',
+                                            '20-24','25-29','30-34',
+                                            '35-39','40-44','45-49',
+                                            '50-54','55-59','60-64',
+                                            '65-69','70+'))
+```
+###看不同年齡層平均每月得登革熱的人數,加上信賴區間
+```{r}
+ggplot(data = ca, 
+       aes(x = age, y = count)) +
+  stat_summary(fun.data = 'mean_cl_boot', size = 1) +
+  scale_y_continuous(breaks = seq(500, 660, by = 20)) +
+  geom_hline(yintercept = mean(ca$age) , 
+             linetype = 'dotted') +
+  labs(x = '年齡層', y = '每月得登革熱的人數') +
+  coord_flip()
+```
+
+###從圖形看起來,得登革熱人數隨年齡升高而增加,且年齡越高人數分布越分散,用ANOVA檢定看看
+```{r}
+anova(a <- lm(count ~ age, data = ca))
+```
+###從p-value為0.2579 > 0.05可知,年齡對得登革熱人數的影響不大
+
+###接下來分析地區對得登革熱人數的影響
+```{r}
+cc = Dengue %>% group_by(year,month,city) %>% summarise(count=sum(count))
+anova(c <- lm(count ~ city, data = cc))
+```
+###由p-value = 0.0004486 < 0.05可知,不同地區得登革熱人數確有差異,畫圖看看
+```{r}
+ggplot(data = cc, 
+       aes(x = city, y = count)) +
+  stat_summary(fun.data = 'mean_cl_boot', size = 1) +
+  scale_y_continuous(breaks = seq(500, 660, by = 20)) +
+  geom_hline(yintercept = mean(cc$city) , 
+             linetype = 'dotted') +
+  labs(x = '縣市', y = '每月得登革熱的人數') +
+  coord_flip()
+```
+
+###由圖可知,高雄市和台南市得登革熱的人數明顯高於其他地區
+
+
