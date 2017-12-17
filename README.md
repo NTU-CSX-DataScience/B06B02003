@@ -6,6 +6,8 @@
 
 作業三 文字雲: https://ntu-csx-datascience.github.io/B06B02003/HW3.html
 
-作業四 TF-IDF&Kmeans: https://ntu-csx-datascience.github.io/B06B02003/HW4.html
+作業四 TF-IDF & Kmeans: https://ntu-csx-datascience.github.io/B06B02003/HW4.html
+
+作業五 SVM & ANOVA: https://ntu-csx-datascience.github.io/B06B02003/HW5.html
 
 shiny : https://angel184.shinyapps.io/angel/
